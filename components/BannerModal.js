@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Upload, Loader2 } from 'lucide-react';
+import { X, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
 import { bannersApi } from '@/lib/api';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 
@@ -10,18 +10,7 @@ export default function BannerModal({ banner, onClose, onSaved }) {
   const isEditing = !!banner;
   
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: banner?.title || '',
-    titleAr: banner?.titleAr || '',
-    subtitle: banner?.subtitle || '',
-    subtitleAr: banner?.subtitleAr || '',
-    linkType: banner?.linkType || 'none',
-    linkValue: banner?.linkValue || '',
-    buttonText: banner?.buttonText || '',
-    buttonTextAr: banner?.buttonTextAr || '',
-    isActive: banner?.isActive !== undefined ? banner.isActive : true,
-  });
-  
+  const [isActive, setIsActive] = useState(banner?.isActive !== undefined ? banner.isActive : true);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(banner?.image || null);
 
@@ -43,9 +32,9 @@ export default function BannerModal({ banner, onClose, onSaved }) {
     setLoading(true);
     try {
       const data = new FormData();
-      Object.keys(formData).forEach(key => {
-        data.append(key, formData[key]);
-      });
+      data.append('title', 'بنر إعلاني');
+      data.append('isActive', isActive);
+
       if (imageFile) {
         data.append('image', imageFile);
       }
@@ -58,7 +47,7 @@ export default function BannerModal({ banner, onClose, onSaved }) {
       onSaved();
     } catch (error) {
       console.error('Error saving banner:', error);
-      alert(lang === 'ar' ? 'حدث خطأ أثناء الحفظ' : 'Error saving banner');
+      alert(lang === 'ar' ? 'حدث خطأ أثناء حفظ البنر' : 'Error saving banner');
     } finally {
       setLoading(false);
     }
@@ -66,93 +55,90 @@ export default function BannerModal({ banner, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white dark:bg-dark-100 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+      <div className="bg-white dark:bg-dark-100 rounded-2xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl">
+        {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-white/10">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            {isEditing ? (lang === 'ar' ? 'تعديل بنر' : 'Edit Banner') : (lang === 'ar' ? 'إضافة بنر جديد' : 'Add New Banner')}
-          </h2>
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center text-primary-500">
+              <ImageIcon size={20} />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              {isEditing ? (lang === 'ar' ? 'تعديل صورة البنر' : 'Edit Banner Image') : (lang === 'ar' ? 'رفع بنر جديد' : 'Upload New Banner')}
+            </h2>
+          </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        {/* Content */}
+        <div className="p-6">
           <form id="banner-form" onSubmit={handleSubmit} className="space-y-6">
             
-            {/* Image Upload */}
+            {/* Image Upload Area */}
             <div>
-              <label className="block text-sm font-medium mb-2">{lang === 'ar' ? 'صورة البنر' : 'Banner Image'}</label>
-              <div className="border-2 border-dashed border-gray-200 dark:border-white/10 rounded-xl p-4 text-center hover:border-primary-500 transition-colors cursor-pointer relative overflow-hidden"
-                   onClick={() => document.getElementById('banner-image').click()}>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                {lang === 'ar' ? 'صورة البنر' : 'Banner Image'}
+              </label>
+              <div
+                className="border-2 border-dashed border-gray-200 dark:border-white/10 rounded-2xl p-4 text-center hover:border-primary-500 dark:hover:border-primary-400 transition-all cursor-pointer relative overflow-hidden bg-gray-50 dark:bg-white/5"
+                onClick={() => document.getElementById('banner-image').click()}
+              >
                 {imagePreview ? (
-                  <div className="relative h-40 w-full rounded-lg overflow-hidden">
-                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="relative h-48 w-full rounded-xl overflow-hidden shadow-sm">
+                    <img src={imagePreview} alt="Banner Preview" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <span className="text-white font-medium flex items-center gap-2"><Upload size={18}/> {lang === 'ar' ? 'تغيير الصورة' : 'Change Image'}</span>
+                      <span className="text-white font-medium flex items-center gap-2 bg-black/50 px-4 py-2 rounded-xl backdrop-blur-sm">
+                        <Upload size={18} />
+                        {lang === 'ar' ? 'تغيير الصورة' : 'Change Image'}
+                      </span>
                     </div>
                   </div>
                 ) : (
-                  <div className="py-8 flex flex-col items-center justify-center gap-2 text-gray-500">
-                    <Upload size={32} className="text-gray-400" />
-                    <span>{lang === 'ar' ? 'اضغط لاختيار صورة' : 'Click to select image'}</span>
+                  <div className="py-12 flex flex-col items-center justify-center gap-3 text-gray-500">
+                    <div className="w-14 h-14 rounded-2xl bg-white dark:bg-dark-50 shadow-sm flex items-center justify-center text-primary-500">
+                      <Upload size={28} />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 dark:text-white">
+                        {lang === 'ar' ? 'اضغط هنا لرفع صورة البنر' : 'Click here to upload banner image'}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">PNG, JPG, WEBP (وصى بالأبعاد العريضة)</p>
+                    </div>
                   </div>
                 )}
                 <input id="banner-image" type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">{lang === 'ar' ? 'العنوان (إنجليزي)' : 'Title (English)'}</label>
-                <input type="text" className="input" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{lang === 'ar' ? 'العنوان (عربي)' : 'Title (Arabic)'}</label>
-                <input type="text" className="input" value={formData.titleAr} onChange={e => setFormData({...formData, titleAr: e.target.value})} required />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">{lang === 'ar' ? 'العنوان الفرعي (إنجليزي)' : 'Subtitle (English)'}</label>
-                <input type="text" className="input" value={formData.subtitle} onChange={e => setFormData({...formData, subtitle: e.target.value})} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{lang === 'ar' ? 'العنوان الفرعي (عربي)' : 'Subtitle (Arabic)'}</label>
-                <input type="text" className="input" value={formData.subtitleAr} onChange={e => setFormData({...formData, subtitleAr: e.target.value})} />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">{lang === 'ar' ? 'نوع الرابط' : 'Link Type'}</label>
-                <select className="input" value={formData.linkType} onChange={e => setFormData({...formData, linkType: e.target.value})}>
-                  <option value="none">{lang === 'ar' ? 'بدون رابط' : 'None'}</option>
-                  <option value="service">{lang === 'ar' ? 'خدمة معينة' : 'Specific Service'}</option>
-                  <option value="url">{lang === 'ar' ? 'رابط خارجي' : 'External URL'}</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{lang === 'ar' ? 'قيمة الرابط' : 'Link Value'}</label>
-                <input type="text" className="input" placeholder={formData.linkType === 'service' ? 'ID الخدمة' : 'https://...'} value={formData.linkValue} onChange={e => setFormData({...formData, linkValue: e.target.value})} />
-              </div>
-            </div>
-
-            <label className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-xl cursor-pointer">
+            {/* Active Toggle */}
+            <label className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
               <input
                 type="checkbox"
-                checked={formData.isActive}
-                onChange={e => setFormData({...formData, isActive: e.target.checked})}
+                checked={isActive}
+                onChange={e => setIsActive(e.target.checked)}
                 className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="font-medium text-gray-900 dark:text-white">{lang === 'ar' ? 'البنر نشط (يظهر في التطبيق)' : 'Active (Shows in App)'}</span>
+              <div>
+                <span className="font-medium text-gray-900 dark:text-white block">
+                  {lang === 'ar' ? 'البنر نشط' : 'Active Banner'}
+                </span>
+                <span className="text-xs text-gray-400">
+                  {lang === 'ar' ? 'يظهر البنر فوراً في الصفحة الرئيسية للتطبيق' : 'Banner appears immediately on mobile app home screen'}
+                </span>
+              </div>
             </label>
 
           </form>
         </div>
 
+        {/* Footer */}
         <div className="p-6 border-t border-gray-100 dark:border-white/10 flex justify-end gap-3 bg-gray-50 dark:bg-white/5">
           <button type="button" onClick={onClose} className="btn-secondary" disabled={loading}>
             {lang === 'ar' ? 'إلغاء' : 'Cancel'}
           </button>
           <button type="submit" form="banner-form" className="btn-primary min-w-[120px]" disabled={loading}>
-            {loading ? <Loader2 size={18} className="animate-spin mx-auto" /> : (lang === 'ar' ? 'حفظ التغييرات' : 'Save Changes')}
+            {loading ? <Loader2 size={18} className="animate-spin mx-auto" /> : (lang === 'ar' ? 'حفظ البنر' : 'Save Banner')}
           </button>
         </div>
       </div>

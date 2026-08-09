@@ -177,6 +177,12 @@ export default function ServicesPage() {
                 </button>
               </div>
 
+              {(service.descriptionAr || service.description) && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
+                  {service.descriptionAr || service.description}
+                </p>
+              )}
+
               {/* Price */}
               <div className="flex items-center justify-between mb-4">
                 <div>

@@ -35,7 +35,6 @@ const navItems = [
   { href: '/reviews', icon: Star, label: 'Reviews', labelAr: 'التقييمات' },
   { href: '/coupons', icon: Tag, label: 'Coupons', labelAr: 'الكوبونات' },
   { href: '/payments', icon: CreditCard, label: 'Payments', labelAr: 'المدفوعات' },
-  { href: '/reports', icon: BarChart3, label: 'Reports', labelAr: 'التقارير' },
   { href: '/notifications', icon: Bell, label: 'Notifications', labelAr: 'الإشعارات' },
   { href: '/chats', icon: MessageSquare, label: 'Chats', labelAr: 'المحادثات' },
   { href: '/banners', icon: Image, label: 'Banners', labelAr: 'البنرات' },
@@ -45,6 +44,8 @@ const navItems = [
 export default function Sidebar({ collapsed, mobileOpen, onMobileClose }) {
   const pathname = usePathname();
   const { lang } = useLanguage();
+
+  const mobileX = lang === 'ar' ? 260 : -260;
 
   return (
     <>
@@ -62,10 +63,10 @@ export default function Sidebar({ collapsed, mobileOpen, onMobileClose }) {
       <AnimatePresence>
         {mobileOpen && (
           <motion.aside
-            initial={{ x: 260 }}
+            initial={{ x: mobileX }}
             animate={{ x: 0 }}
-            exit={{ x: 260 }}
-            transition={{ type: 'spring', damping: 25 }}
+            exit={{ x: mobileX }}
+            transition={{ type: 'tween', duration: 0.2, ease: 'easeInOut' }}
             className="sidebar flex flex-col lg:hidden shadow-2xl z-50"
           >
             <SidebarContent collapsed={false} pathname={pathname} lang={lang} onClose={onMobileClose} />
@@ -83,21 +84,14 @@ function SidebarContent({ collapsed, pathname, lang, onClose }) {
         <div className="w-9 h-9 gradient-primary rounded-xl flex items-center justify-center flex-shrink-0">
           <Waves size={18} className="text-white" />
         </div>
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: 'auto' }}
-              exit={{ opacity: 0, width: 0 }}
-              className="overflow-hidden"
-            >
-              <p className="text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">
-                {lang === 'ar' ? 'المتحدة للنظافة' : 'United Cleaning'}
-              </p>
-              <p className="text-xs text-gray-400 whitespace-nowrap">Admin Dashboard</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {!collapsed && (
+          <div className="overflow-hidden">
+            <p className="text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">
+              {lang === 'ar' ? 'المتحدة للنظافة' : 'United Cleaning'}
+            </p>
+            <p className="text-xs text-gray-400 whitespace-nowrap">Admin Dashboard</p>
+          </div>
+        )}
       </div>
 
       {/* Nav Items */}
@@ -114,23 +108,13 @@ function SidebarContent({ collapsed, pathname, lang, onClose }) {
               title={collapsed ? (lang === 'ar' ? item.labelAr : item.label) : undefined}
             >
               <Icon size={18} className="flex-shrink-0" />
-              <AnimatePresence>
-                {!collapsed && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-sm whitespace-nowrap"
-                  >
-                    {lang === 'ar' ? item.labelAr : item.label}
-                  </motion.span>
-                )}
-              </AnimatePresence>
+              {!collapsed && (
+                <span className="text-sm whitespace-nowrap">
+                  {lang === 'ar' ? item.labelAr : item.label}
+                </span>
+              )}
               {isActive && !collapsed && (
-                <motion.div
-                  layoutId="activeIndicator"
-                  className="ms-auto w-1.5 h-1.5 rounded-full bg-primary-500"
-                />
+                <div className="ms-auto w-1.5 h-1.5 rounded-full bg-primary-500" />
               )}
             </Link>
           );
@@ -143,14 +127,12 @@ function SidebarContent({ collapsed, pathname, lang, onClose }) {
           <div className="w-8 h-8 gradient-primary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
             SA
           </div>
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <p className="text-sm font-medium text-gray-800 dark:text-white">Super Admin</p>
-                <p className="text-xs text-gray-400">superadmin@unitedcleaning.com</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {!collapsed && (
+            <div>
+              <p className="text-sm font-medium text-gray-800 dark:text-white">Super Admin</p>
+              <p className="text-xs text-gray-400">superadmin@unitedcleaning.com</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

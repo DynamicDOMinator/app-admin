@@ -7,7 +7,7 @@ import {
   Save, ArrowRight, Plus, Trash2, Box, Calendar, Layers, Check,
   Home, Sparkles, Droplets, Shirt, Bed, Car, Briefcase, Star, Zap,
   Trees, Flower, PaintBucket, Wrench, Hammer, Bath, Fan, Monitor,
-  Smartphone, Scissors, Trash, Shield, Grid
+  Smartphone, Scissors, Trash, Shield, Grid, Upload
 } from 'lucide-react';
 
 const ICONS_LIST = [
@@ -43,10 +43,16 @@ export default function NewServicePage() {
   const [formData, setFormData] = useState({
     name: '',
     nameAr: '',
+    description: '',
+    descriptionAr: '',
+    notice: '',
+    noticeAr: '',
     icon: 'sparkles-outline',
     serviceType: 'home_cleaning',
     basePrice: 0,
     priceUnit: 'flat',
+    sameDayFeePercent: 15,
+    sameDayCutoffHour: 13,
     isActive: true,
     cleaningTypes: [],
     pricingOptions: [],
@@ -131,14 +137,110 @@ export default function NewServicePage() {
               <label className="block text-sm font-medium mb-1">وحدة التسعير الافتراضية</label>
               <select className="input" value={formData.priceUnit} onChange={e => setFormData({...formData, priceUnit: e.target.value})}>
                 <option value="flat">سعر ثابت</option>
-                <option value="per_sqm">بالمتر المربع</option>
-                <option value="per_piece">بالقطعة</option>
+                <option value="per_sqm">بالمتر المربع (حساب المساحة)</option>
+                <option value="per_meter">بالمتر الطولي (أمتار)</option>
+                <option value="per_piece">بالقطعة / بالعدد</option>
+                <option value="per_item">بالوحدة / العنصر</option>
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">نسبة إضافية لحجز نفس اليوم (%)</label>
+              <div className="relative">
+                <input type="number" className="input pl-8" value={formData.sameDayFeePercent} onChange={e => setFormData({...formData, sameDayFeePercent: Number(e.target.value) || 0})} placeholder="15" />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">%</span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">توقيت إغلاق حجز نفس اليوم (نظام 24 ساعة)</label>
+              <select className="input" value={formData.sameDayCutoffHour} onChange={e => setFormData({...formData, sameDayCutoffHour: Number(e.target.value)})}>
+                {Array.from({ length: 24 }, (_, i) => {
+                  const hour24 = String(i).padStart(2, '0') + ':00';
+                  let label = hour24;
+                  if (i === 0) label += ' (00:00 - منتصف الليل)';
+                  else if (i === 12) label += ' (12:00 - ظهراً)';
+                  else if (i > 12) label += ` (${i - 12}:00 ${i >= 17 ? 'مساءً' : 'عصراً'})`;
+                  else label += ` (${i}:00 صباحاً)`;
+                  return <option key={i} value={i}>{label}</option>;
+                })}
+              </select>
+            </div>
+            <div className="col-span-1 md:col-span-2">
+              <label className="block text-sm font-medium mb-1">وصف الخدمة (عربي)</label>
+              <textarea rows={2} className="input" value={formData.descriptionAr} onChange={e => setFormData({...formData, descriptionAr: e.target.value})} placeholder="أدخل وصفاً تفصيلياً للخدمة يظهر للعميل عند الحجز" />
+            </div>
+            <div className="col-span-1 md:col-span-2">
+              <label className="block text-sm font-medium mb-1">وصف الخدمة (إنجليزي)</label>
+              <textarea rows={2} className="input" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Enter service description in English" />
+            </div>
+            <div className="col-span-1 md:col-span-2 bg-amber-50/50 dark:bg-amber-500/10 p-4 rounded-xl border border-amber-200/60 dark:border-amber-500/20">
+              <label className="block text-sm font-bold text-amber-900 dark:text-amber-300 mb-1 flex items-center gap-1.5">
+                <span>⚠️</span> تنبيه وإشعار الخدمة (يظهر بارزاً للعميل في التطبيق)
+              </label>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mb-2">أدخل أي تنبيه أو شرط هائم يظهر كشريط تحذير للمستخدم عند اختيار هذه الخدمة</p>
+              <textarea
+                rows={2}
+                className="input border-amber-300 focus:border-amber-500 dark:bg-dark-50"
+                value={formData.noticeAr}
+                onChange={e => setFormData({...formData, noticeAr: e.target.value})}
+                placeholder="مثال: زيارة واحدة و إضافة تنبيه ، فى حالة توجب زيارة اخرى بسبب صعوبة البقع، يمكن رفع التكلفة بنسبة ٥٠%"
+              />
             </div>
           </div>
 
+          {/* Service Icon Section */}
           <div className="mt-6 border-t pt-6">
-            <label className="block text-sm font-medium mb-4 flex items-center gap-2"><Grid size={18} className="text-primary-500"/> أيقونة الخدمة في التطبيق</label>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <div>
+                <label className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Grid size={18} className="text-primary-500"/> أيقونة الخدمة في التطبيق
+                </label>
+                <p className="text-xs text-gray-500 mt-1">اختر من الأيقونات الجاهزة أو قم برفع أيقونة خاصة بك من جهازك (PNG, SVG, JPG)</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="btn-secondary text-xs cursor-pointer py-2 px-3 flex items-center gap-1.5 shrink-0">
+                  <Upload size={14} className="text-primary-600" />
+                  <span>رفع أيقونة من جهازك</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData(prev => ({ ...prev, icon: reader.result }));
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Custom Uploaded Icon Preview */}
+            {formData.icon && (formData.icon.startsWith('http') || formData.icon.startsWith('data:')) && (
+              <div className="mb-4 p-3 bg-primary-50/50 dark:bg-primary-900/10 rounded-xl border border-primary-200 dark:border-primary-800/30 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img src={formData.icon} alt="Custom Icon" className="w-10 h-10 object-contain rounded-lg bg-white p-1 border border-gray-200 shadow-sm" />
+                  <div>
+                    <span className="text-xs font-bold text-primary-700 dark:text-primary-400 block">تم اختيار أيقونة مخصصة (صورة مرفوعة)</span>
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400">ستظهر هذه الصورة كأيقونة رسمية للخدمة في تطبيق الموبايل</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, icon: 'sparkles-outline' }))}
+                  className="text-xs text-red-500 hover:underline shrink-0"
+                >
+                  إلغاء واستخدام الأيقونات الجاهزة
+                </button>
+              </div>
+            )}
+
+            {/* Predefined Icon Grid */}
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
               {ICONS_LIST.map((ic) => {
                 const IconComp = ic.icon;
@@ -150,7 +252,7 @@ export default function NewServicePage() {
                     onClick={() => setFormData({...formData, icon: ic.id})}
                     className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
                       isSelected 
-                      ? 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400' 
+                      ? 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400 shadow-sm scale-105' 
                       : 'border-transparent bg-gray-50 text-gray-500 hover:bg-gray-100 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10'
                     }`}
                   >
@@ -245,24 +347,33 @@ export default function NewServicePage() {
           </div>
         </div>
 
-        {/* Pricing Options (For Furniture etc) */}
+        {/* Pricing Options & Areas */}
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold flex items-center gap-2"><Box size={20} className="text-primary-500"/> القطع الإضافية (كنب، سجاد...)</h2>
+            <h2 className="text-lg font-bold flex items-center gap-2"><Box size={20} className="text-primary-500"/> المساحات والقطع الإضافية (سعر المتر / عدد / أمتار)</h2>
             <button type="button" onClick={() => handleArrayAdd('pricingOptions', { labelAr: '', price: 0, unit: 'per_piece' })} className="btn-secondary text-xs">
-              <Plus size={14} /> إضافة قطعة
+              <Plus size={14} /> إضافة مساحة أو قطعة
             </button>
           </div>
           <div className="space-y-4">
             {formData.pricingOptions.map((item, index) => (
               <div key={item.key} className="flex flex-col sm:flex-row gap-4 items-end bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-100 dark:border-white/10 relative group">
                 <div className="flex-1 w-full">
-                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">اسم القطعة (عربي)</label>
-                  <input type="text" className="input" value={item.labelAr} onChange={e => handleArrayChange('pricingOptions', index, 'labelAr', e.target.value)} placeholder="طقم أنتريه" />
+                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">الاسم/المساحة (عربي)</label>
+                  <input type="text" className="input" value={item.labelAr} onChange={e => handleArrayChange('pricingOptions', index, 'labelAr', e.target.value)} placeholder="مثال: غسيل سجاد / صالة / كنب" />
                 </div>
                 <div className="flex-1 w-full">
-                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">اسم القطعة (إنجليزي)</label>
-                  <input type="text" className="input" value={item.label} onChange={e => handleArrayChange('pricingOptions', index, 'label', e.target.value)} placeholder="Sofa Set" />
+                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">الاسم/المساحة (إنجليزي)</label>
+                  <input type="text" className="input" value={item.label} onChange={e => handleArrayChange('pricingOptions', index, 'label', e.target.value)} placeholder="Carpet / Hall / Sofa" />
+                </div>
+                <div className="w-full sm:w-36">
+                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">نوع التسعير</label>
+                  <select className="input text-xs" value={item.unit || 'per_piece'} onChange={e => handleArrayChange('pricingOptions', index, 'unit', e.target.value)}>
+                    <option value="per_piece">بالقطعة / بالعدد</option>
+                    <option value="per_sqm">بالمتر المربع</option>
+                    <option value="per_meter">بالمتر الطولي</option>
+                    <option value="flat">سعر ثابت</option>
+                  </select>
                 </div>
                 <div className="w-full sm:w-32">
                   <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">السعر</label>
@@ -278,7 +389,7 @@ export default function NewServicePage() {
             ))}
             {formData.pricingOptions.length === 0 && (
               <div className="text-center py-8 bg-gray-50 dark:bg-white/5 rounded-xl border border-dashed border-gray-200 dark:border-white/10">
-                <p className="text-sm text-gray-400">لا توجد قطع إضافية</p>
+                <p className="text-sm text-gray-400">لا توجد مساحات أو قطع إضافية مضافة</p>
               </div>
             )}
           </div>

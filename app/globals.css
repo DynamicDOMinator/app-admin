@@ -171,10 +171,15 @@
 }
 
 @layer utilities {
-  .sidebar-offset { margin-left: var(--sidebar-width); }
-  .sidebar-offset-collapsed { margin-left: var(--sidebar-collapsed); }
-  [dir="rtl"] .sidebar-offset { margin-left: 0; margin-right: var(--sidebar-width); }
-  [dir="rtl"] .sidebar-offset-collapsed { margin-left: 0; margin-right: var(--sidebar-collapsed); }
+  @media (min-width: 1024px) {
+    .sidebar-offset { margin-left: var(--sidebar-width); }
+    .sidebar-offset-collapsed { margin-left: var(--sidebar-collapsed); }
+    [dir="rtl"] .sidebar-offset { margin-left: 0; margin-right: var(--sidebar-width); }
+    [dir="rtl"] .sidebar-offset-collapsed { margin-left: 0; margin-right: var(--sidebar-collapsed); }
+  }
+  @media (max-width: 1023px) {
+    .sidebar-offset, .sidebar-offset-collapsed { margin-left: 0 !important; margin-right: 0 !important; }
+  }
 
   .text-gradient {
     @apply bg-gradient-to-r from-primary-500 to-blue-400 bg-clip-text text-transparent;

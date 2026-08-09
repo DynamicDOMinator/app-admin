@@ -74,7 +74,7 @@ export default function Header({ onToggleSidebar, onMobileMenu }) {
 
   return (
     <header
-      className="sticky top-0 z-30 flex items-center gap-4 px-6 bg-white/80 dark:bg-dark-50/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/5"
+      className="sticky top-0 z-30 flex items-center gap-2 sm:gap-4 px-3 sm:px-6 bg-white/80 dark:bg-dark-50/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/5"
       style={{ height: 'var(--header-height)' }}
     >
       {/* Sidebar toggle (desktop) */}
@@ -97,7 +97,7 @@ export default function Header({ onToggleSidebar, onMobileMenu }) {
 
       {/* Search */}
       <motion.div
-        className={`relative flex-1 max-w-md transition-all duration-200 ${searchFocused ? 'max-w-xl' : ''}`}
+        className={`relative flex-1 max-w-[150px] sm:max-w-md transition-all duration-200 ${searchFocused ? 'max-w-[200px] sm:max-w-xl' : ''}`}
       >
         <Search
           size={16}
@@ -105,8 +105,8 @@ export default function Header({ onToggleSidebar, onMobileMenu }) {
         />
         <input
           type="search"
-          placeholder={lang === 'ar' ? 'ابحث عن طلب، عميل، موظف...' : 'Search order, customer, employee...'}
-          className="input pr-9 text-sm h-9"
+          placeholder={lang === 'ar' ? 'ابحث...' : 'Search...'}
+          className="input pr-8 sm:pr-9 text-xs sm:text-sm h-9"
           onFocus={() => setSearchFocused(true)}
           onBlur={() => setSearchFocused(false)}
         />
