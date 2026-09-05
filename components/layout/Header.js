@@ -28,7 +28,7 @@ export default function Header({ onToggleSidebar, onMobileMenu }) {
     const token = getCookie('accessToken');
     if (!token) return;
 
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000', {
+    const socket = io(process.env.NEXT_PUBLIC_API_URL || 'https://app.prosental.online' || 'http://localhost:5001', {
       auth: { token },
     });
 

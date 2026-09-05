@@ -237,6 +237,83 @@ export default function OrdersPage() {
                 </div>
               </div>
 
+              {/* Order Items & Services Breakdown */}
+              <div className="border-t border-gray-100 dark:border-gray-700 pt-4 mb-4">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
+                  {lang === 'ar' ? 'الخدمات وتفاصيل الغرف والمساحات' : 'Services & Room/Area Details'}
+                </h3>
+                <div className="space-y-3">
+                  {(selectedOrder.items || []).map((item, idx) => (
+                    <div key={idx} className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-200/70 dark:border-white/10 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-gray-900 dark:text-white">
+                          {item.serviceNameAr || item.serviceName || item.service?.nameAr || item.service?.name} (×{item.quantity || 1})
+                        </span>
+                        <span className="font-bold text-teal-600">
+                          {formatCurrency(item.totalPrice || item.unitPrice || 0)}
+                        </span>
+                      </div>
+
+                      {/* Package subscription details */}
+                      {(item.options?.isPackage || item.options?.packageNameAr || item.options?.visits) && (
+                        <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800/50 space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">
+                              📦 {lang === 'ar' ? 'باقة اشتراك:' : 'Package Subscription:'} {item.options?.packageNameAr || item.serviceNameAr}
+                            </span>
+                            <span className="text-[11px] font-extrabold bg-emerald-200 dark:bg-emerald-800 text-emerald-900 dark:text-emerald-100 px-2 py-0.5 rounded">
+                              {item.options?.visits || 1} {lang === 'ar' ? 'زيارات' : 'visits'}
+                            </span>
+                          </div>
+                          {item.options?.visitsDetailsAr && (
+                            <p className="text-xs text-emerald-800 dark:text-emerald-400">
+                              {item.options.visitsDetailsAr}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Rooms breakdown */}
+                      {((item.rooms && item.rooms.length > 0) || (item.options?.rooms && item.options.rooms.length > 0)) && (
+                        <div className="bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-emerald-100 dark:border-emerald-900/30">
+                          <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400 mb-1.5 flex items-center gap-1">
+                            🏠 {lang === 'ar' ? 'الغرف المحددة:' : 'Selected Rooms:'}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {(item.rooms || item.options?.rooms || []).map((rm, rIdx) => (
+                              <span key={rIdx} className="bg-emerald-50 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs px-2.5 py-0.5 rounded-md font-medium border border-emerald-200/60">
+                                {rm.labelAr || rm.label || rm.nameAr || rm.name}: <b>{rm.count || 1}</b> {Number(rm.price) > 0 ? `(${rm.price * (rm.count || 1)} ج.م)` : ''}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Area details */}
+                      {(item.areaDetails || item.options?.areaDetails || item.totalMeters || (item.width && item.length)) && (
+                        <div className="bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-blue-100 dark:border-blue-900/30">
+                          <p className="text-xs font-bold text-blue-800 dark:text-blue-400 mb-1 flex items-center gap-1">
+                            📐 {lang === 'ar' ? 'المساحة / المقاسات:' : 'Area / Dimensions:'}
+                          </p>
+                          <span className="text-xs text-blue-900 dark:text-blue-200 font-semibold">
+                            {item.areaDetails?.labelAr || item.areaDetails?.label || item.options?.areaDetails?.labelAr || item.options?.areaDetails?.label || (item.totalMeters ? `${item.totalMeters} م²` : `${item.width} × ${item.length} م`)}
+                            {(item.areaDetails?.price || item.options?.areaDetails?.price) ? ` (${item.areaDetails?.price || item.options?.areaDetails?.price} ج.م)` : ''}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Extra Pricing Options */}
+                      {item.options?.pricingOptions && item.options.pricingOptions.length > 0 && (
+                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                          <span className="font-semibold">{lang === 'ar' ? 'ملحقات إضافية:' : 'Extra options:'} </span>
+                          {item.options.pricingOptions.map(o => `${o.labelAr || o.label} (×${o.count || 1})`).join('، ')}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {selectedOrder.paymentMethod === 'instapay' && selectedOrder.instapayReceipt && (
                 <div className="mt-6 border-t border-gray-100 dark:border-gray-700 pt-6">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
